@@ -1,3 +1,8 @@
-python course
+# Odin Digital
+## Author: Andrés González
 
-by Andrés González Méndez
+### Changelog:
+
+#### Version 1.0
+Date: 30 Sep 2022
+- Initial version
