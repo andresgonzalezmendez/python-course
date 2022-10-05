@@ -52,7 +52,12 @@ def exitapp():
 
 def saveimage(image, initial_dir, dialog_title):
     """Dialog for saving images"""
-    if messagebox.askyesno(message = "Do you want to save the image before closing?"):
+
+    user_choice = messagebox.askyesnocancel(
+        message = "Do you want to save the image before closing?"
+        )
+
+    if user_choice:
         filename = filedialog.asksaveasfilename(
             initialdir = initial_dir,
             title = dialog_title,
@@ -60,6 +65,9 @@ def saveimage(image, initial_dir, dialog_title):
         )
         cv2.imwrite(filename, image)
         cv2.destroyAllWindows()
+    elif user_choice is None:
+        cv2.waitKey(0)
+        saveimage(image, initial_dir, dialog_title)
     else:
         cv2.destroyAllWindows()
 
@@ -114,7 +122,6 @@ def compareimages():
             # show the differences in white, instead of the difference color itself
 
             cv2.imshow("Difference", difference)
-
             cv2.waitKey(0)
             saveimage(difference, "img", "Save your image")
 
