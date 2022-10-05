@@ -9,6 +9,7 @@ Date: 5 Oct 2022
 
 ### Version 1.2 (work in progress)
 Date:
+- Exit logic refactoring
 - compareimages bugfix
 
 ### Version 1.1

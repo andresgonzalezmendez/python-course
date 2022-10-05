@@ -26,7 +26,7 @@ FILES_ALLOWED = [("Image Files",
     ".pbm", ".pgm", ".ppm", ".sr", ".ras", ".tiff", ".tif"])]
 COLOR2GRAY_LABEL = "Select a color image to convert it to grayscale"
 COMPAREIMAGES_LABEL = "Select two images to see how different they are"
-CLOSE_LABEL = "See you soon!"
+EXIT_APP = "See you soon!"
 PADY_INTROTEXT = 40
 PADY_FRAMES = 20
 PADY_LABELSBUTTONS = 5
@@ -43,9 +43,11 @@ def openimagedialog(initial_dir, dialog_title):
 
     return cv2.imread(file)
 
-def closewindow():
+def exitapp():
     """Show confirmation dialog"""
-    if messagebox.askyesno(message = "Are you sure you want to close the app?"):
+    if messagebox.askyesno(
+        message = "Are you sure you want to exit the app?",
+        default = messagebox.NO):
         root.destroy()
 
 def saveimage(image, initial_dir, dialog_title):
@@ -214,31 +216,31 @@ compareimages_button = tk.Button(
     )
 compareimages_button.pack(pady = PADY_LABELSBUTTONS)
 
-## Close frame
+## Exit frame
 
-close_frame = tk.Frame(
+exit_frame = tk.Frame(
     root,
     bg = WINDOW_BACKGROUND_COLOR
 )
-close_frame.pack(pady = PADY_FRAMES)
+exit_frame.pack(pady = PADY_FRAMES)
 
-close_label = tk.Label(
-    close_frame,
-    text = CLOSE_LABEL,
+exit_label = tk.Label(
+    exit_frame,
+    text = EXIT_APP,
     font = (FONT, 15),
     bg = WINDOW_BACKGROUND_COLOR
 )
-close_label.pack(pady = PADY_LABELSBUTTONS)
+exit_label.pack(pady = PADY_LABELSBUTTONS)
 
-close_button = tk.Button(
-    close_frame,
-    text = "Close",
+exit_button = tk.Button(
+    exit_frame,
+    text = "Exit",
     font = (FONT, 15),
-    command = closewindow
+    command = exitapp
     )
-close_button.pack(pady = PADY_LABELSBUTTONS)
+exit_button.pack(pady = PADY_LABELSBUTTONS)
 
 ##
 
-root.protocol("WM_DELETE_WINDOW", closewindow)
+root.protocol("WM_DELETE_WINDOW", exitapp)
 root.mainloop()
