@@ -1,6 +1,6 @@
 """
 Program: Odin Digital
-Version: 1.1
+Version: 1.2-beta
 Author: Andrés González Méndez
 Date: 5 Oct 2022
 Main script
@@ -15,7 +15,7 @@ import cv2
 # CONSTANTS
 
 PROGRAM_NAME = "Odin Digital"
-VERSION_NUMBER = "1.1"
+VERSION_NUMBER = "1.2-beta"
 FONT = "Verdana"
 WINDOW_BACKGROUND_COLOR = "light gray"
 WELCOME_TEXT = f"""Welcome to {PROGRAM_NAME} v{VERSION_NUMBER}, a digital image processing tool
@@ -87,7 +87,7 @@ def compareimages():
         print("""ERROR:
         Both images must be the same size.""")
     else:
-        difference = cv2.subtract(image_a, image_b)
+        difference = cv2.absdiff(image_a, image_b)
 
         cv2.imshow("Original images", cv2.hconcat([image_a, image_b]))
 

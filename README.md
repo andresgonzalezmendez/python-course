@@ -7,6 +7,10 @@ Date: 5 Oct 2022
 
 ## Changelog:
 
+### Version 1.2 (work in progress)
+Date:
+- compareimages bugfix
+
 ### Version 1.1
 Date: 5 Oct 2022
 - Added color2gray functionality
