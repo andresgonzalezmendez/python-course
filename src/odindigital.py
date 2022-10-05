@@ -173,6 +173,44 @@ intro_text = tk.Label(
 )
 intro_text.pack(pady = PADY_INTROTEXT)
 
+## Menu bar
+
+menu_bar = tk.Menu()
+
+file_menu = tk.Menu(
+    menu_bar,
+    tearoff = False
+)
+file_menu.add_command(
+    label = "Exit",
+    command = exitapp
+    )
+
+menu_bar.add_cascade(
+    menu = file_menu,
+    label = "File"
+)
+
+tools_menu = tk.Menu(
+    menu_bar,
+    tearoff = False
+)
+tools_menu.add_command(
+    label = "Color -> Gray",
+    command = color2gray
+    )
+tools_menu.add_command(
+    label = "Compare images",
+    command = compareimages
+    )
+
+menu_bar.add_cascade(
+    menu = tools_menu,
+    label = "Tools"
+)
+
+root.configure(menu = menu_bar)
+
 ## Color2gray frame
 
 color2gray_frame = tk.Frame(

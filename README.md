@@ -14,6 +14,7 @@ Date:
 
 ### Version 1.1
 Date: 5 Oct 2022
+- Added menu bar
 - Added color2gray functionality
 - Added option to save image as a file
 - UI improved
