@@ -1,6 +1,8 @@
 # Odin Digital
 Author: Andrés González
+
 Last published version: v1.1
+
 Date: 5 Oct 2022
 
 ## Changelog:
