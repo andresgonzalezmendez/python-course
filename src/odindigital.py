@@ -1,57 +1,244 @@
 """
 Program: Odin Digital
-Version: 1.0
+Version: 1.1
 Author: Andrés González Méndez
-Date: 30 Sep 2022
+Date: 5 Oct 2022
 Main script
 """
 
-from tkinter import messagebox
+# IMPORTS
+
+from tkinter import messagebox, filedialog
 import tkinter as tk
-import odinfunctions
+import cv2
 
-dialog = tk.Tk()
-dialog.title("Odin Digital 1.1")
-dialog.geometry("1280x720")
-dialog.resizable(False, False)
+# CONSTANTS
 
-button1 = tk.Button(
-    dialog,
-    text = "Compare images",
-    command = odinfunctions.compareimages
-    )
-button1.pack(pady = 50)
+PROGRAM_NAME = "Odin Digital"
+VERSION_NUMBER = "1.1"
+FONT = "Verdana"
+WINDOW_BACKGROUND_COLOR = "light gray"
+WELCOME_TEXT = f"""Welcome to {PROGRAM_NAME} v{VERSION_NUMBER}, a digital image processing tool
+developed by your QA friend Andrés González.
+\nPlease select an option:"""
+FILES_ALLOWED = [("Image Files",
+    [".bmp", ".dib", ".jpeg", ".jpg", ".jpe", ".jp2", ".png",
+    ".pbm", ".pgm", ".ppm", ".sr", ".ras", ".tiff", ".tif"])]
+COLOR2GRAY_LABEL = "Select a color image to convert it to grayscale"
+COMPAREIMAGES_LABEL = "Select two images to see how different they are"
+CLOSE_LABEL = "See you soon!"
+PADY_INTROTEXT = 40
+PADY_FRAMES = 20
+PADY_LABELSBUTTONS = 5
 
-button2 = tk.Button(
-    dialog,
-    text = "Button2"
-    )
-button2.pack(pady = 50)
+# FUNCTIONS
 
-button3 = tk.Button(
-    dialog,
-    text = "Button3"
-    )
-button3.pack(pady = 50)
+def openimagedialog(initial_dir, dialog_title):
+    """Function to read an image from the computer"""
 
-button4 = tk.Button(
-    dialog,
-    text = "Button4"
-    )
-button4.pack(pady = 50)
+    file = filedialog.askopenfilename(
+        initialdir = initial_dir,
+        title = dialog_title,
+        filetypes = FILES_ALLOWED)
 
-def closedialog():
+    return cv2.imread(file)
+
+def closewindow():
     """Show confirmation dialog"""
     if messagebox.askyesno(message = "Are you sure you want to close the app?"):
-        dialog.destroy()
+        root.destroy()
 
-closebutton = tk.Button(
-    dialog,
-    text = "Close",
-    command = closedialog
+def saveimage(image, initial_dir, dialog_title):
+    """Dialog for saving images"""
+    if messagebox.askyesno(message = "Do you want to save the image before closing?"):
+        filename = filedialog.asksaveasfilename(
+            initialdir = initial_dir,
+            title = dialog_title,
+            filetypes = FILES_ALLOWED
+        )
+        cv2.imwrite(filename, image)
+        cv2.destroyAllWindows()
+    else:
+        cv2.destroyAllWindows()
+
+def getimagesize(image):
+    """Get image size"""
+
+    height = image.shape[0]
+    width = image.shape[1]
+    channels = image.shape[2]
+    return (height, width, channels)
+
+def compareimagesizes(image1, image2):
+    """Compare image sizes"""
+
+    if getimagesize(image1) == getimagesize(image2):
+        return True
+
+    return False
+
+def compareimages():
+    """ Function to compare two images"""
+
+    image_a = openimagedialog("img", "Select image number 1")
+    image_b = openimagedialog("img", "Select image number 2")
+
+    if not compareimagesizes(image_a, image_b):
+        print("""ERROR:
+        Both images must be the same size.""")
+    else:
+        difference = cv2.subtract(image_a, image_b)
+
+        cv2.imshow("Original images", cv2.hconcat([image_a, image_b]))
+
+        num_different_pixels = cv2.countNonZero(
+            cv2.cvtColor(difference, cv2.COLOR_BGR2GRAY))
+
+        if num_different_pixels == 0:
+            print ("""RESULT:
+            Both images are exactly the same!""")
+
+            cv2.waitKey(0)
+            cv2.destroyAllWindows()
+
+        else:
+            percentage_different_pixels = 100 * num_different_pixels/(
+                getimagesize(difference)[0]*getimagesize(difference)[1])
+            print(f"""RESULT:
+            There are differences between the two images!
+            Percentage of different pixels: {percentage_different_pixels:.2f}%""")
+
+            # TO DO:
+            # show the differences in white, instead of the difference color itself
+
+            cv2.imshow("Difference", difference)
+
+            cv2.waitKey(0)
+            saveimage(difference, "img", "Save your image")
+
+def isgrayscale(image):
+    """Detects if an image is grayscale or not"""
+
+    rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+    for i in range(getimagesize(rgb_image)[0]):
+        for j in range(getimagesize(rgb_image)[1]):
+            (r_value, g_value, b_value) = rgb_image[i, j]
+            if not r_value == g_value == b_value:
+                return False
+
+    return True
+
+def color2gray():
+    """ Function to turn an image from color to grayscale"""
+
+    color_image = openimagedialog("img", "Select image")
+
+    if isgrayscale(color_image):
+        print("""ERROR:
+        The images is grayscale already.""")
+    else:
+        gray_image = cv2.cvtColor(color_image, cv2.COLOR_BGR2GRAY)
+
+        cv2.imshow("Original image", color_image)
+        cv2.imshow("Grayscale image", gray_image)
+
+        cv2.waitKey(0)
+        saveimage(gray_image, "img", "Save your image")
+
+# MAIN
+
+root = tk.Tk()
+root.title(f"{PROGRAM_NAME} v{VERSION_NUMBER}")
+root.geometry("800x600")
+root.resizable(False, False)
+root.configure(bg = WINDOW_BACKGROUND_COLOR)
+
+## Welcome text
+
+intro_text = tk.Label(
+    root,
+    text = WELCOME_TEXT,
+    font = (FONT, 20),
+    bg = WINDOW_BACKGROUND_COLOR
+)
+intro_text.pack(pady = PADY_INTROTEXT)
+
+## Color2gray frame
+
+color2gray_frame = tk.Frame(
+    root,
+    bg = WINDOW_BACKGROUND_COLOR
+)
+color2gray_frame.pack(pady = PADY_FRAMES)
+
+color2gray_label = tk.Label(
+    color2gray_frame,
+    text = COLOR2GRAY_LABEL,
+    font = (FONT, 15),
+    bg = WINDOW_BACKGROUND_COLOR
+)
+color2gray_label.pack(pady = PADY_LABELSBUTTONS)
+
+color2gray_button = tk.Button(
+    color2gray_frame,
+    text = "Color -> Gray",
+    font = (FONT, 15),
+    bg = WINDOW_BACKGROUND_COLOR,
+    command = color2gray
     )
-closebutton.pack(pady = 50)
+color2gray_button.pack(pady = PADY_LABELSBUTTONS)
 
-dialog.protocol("WM_DELETE_WINDOW", closedialog)
+## Compareimages frame
 
-dialog.mainloop()
+compareimages_frame = tk.Frame(
+    root,
+    bg = WINDOW_BACKGROUND_COLOR
+)
+compareimages_frame.pack(pady = PADY_FRAMES)
+
+compareimages_label = tk.Label(
+    compareimages_frame,
+    text = COMPAREIMAGES_LABEL,
+    font = (FONT, 15),
+    bg = WINDOW_BACKGROUND_COLOR
+)
+compareimages_label.pack(pady = PADY_LABELSBUTTONS)
+
+compareimages_button = tk.Button(
+    compareimages_frame,
+    text = "Compare images",
+    font = (FONT, 15),
+    bg = WINDOW_BACKGROUND_COLOR,
+    command = compareimages
+    )
+compareimages_button.pack(pady = PADY_LABELSBUTTONS)
+
+## Close frame
+
+close_frame = tk.Frame(
+    root,
+    bg = WINDOW_BACKGROUND_COLOR
+)
+close_frame.pack(pady = PADY_FRAMES)
+
+close_label = tk.Label(
+    close_frame,
+    text = CLOSE_LABEL,
+    font = (FONT, 15),
+    bg = WINDOW_BACKGROUND_COLOR
+)
+close_label.pack(pady = PADY_LABELSBUTTONS)
+
+close_button = tk.Button(
+    close_frame,
+    text = "Close",
+    font = (FONT, 15),
+    command = closewindow
+    )
+close_button.pack(pady = PADY_LABELSBUTTONS)
+
+##
+
+root.protocol("WM_DELETE_WINDOW", closewindow)
+root.mainloop()
