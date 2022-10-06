@@ -9,6 +9,7 @@ Date: 5 Oct 2022
 
 ### Version 1.2 (work in progress)
 Date:
+- Added warning and info dialogs
 - Added feature to display images in tkinter windows
 - Added menu bar
 - Exit logic refactoring

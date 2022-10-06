@@ -136,33 +136,39 @@ def compareimages():
     image_b = openimagedialog("img", "Select image number 2")
 
     if not compareimagesizes(image_a, image_b):
-        print("""ERROR:
-        Both images must be the same size.""")
+        messagebox.showwarning(
+            title = "Warning",
+            message = "Both images must be the same size"
+            )
+        compareimages()
     else:
         difference = cv2.absdiff(image_a, image_b)
 
         displayimage(image_a, "Image n.1")
         displayimage(image_b, "Image n.2")
 
-        #cv2.imshow("Original images", cv2.hconcat([image_a, image_b]))
-
         num_different_pixels = cv2.countNonZero(
             cv2.cvtColor(difference, cv2.COLOR_BGR2GRAY))
 
         if num_different_pixels == 0:
-            print ("""RESULT:
-            Both images are exactly the same!""")
+            messagebox.showinfo(
+                title = "Result",
+                message = "Both images are the same!"
+                )
         else:
             percentage_different_pixels = 100 * num_different_pixels/(
                 getimagesize(difference)[0]*getimagesize(difference)[1])
-            print(f"""RESULT:
-            There are differences between the two images!
-            Percentage of different pixels: {percentage_different_pixels:.2f}%""")
 
             # TO DO:
             # show the differences in white, instead of the difference color itself
 
             displayimage(difference, "Difference")
+
+            messagebox.showinfo(
+                title = "Result",
+                message = f"""There are differences between the two images!
+                Difference: {percentage_different_pixels:.2f}%"""
+                )
 
 def isgrayscale(image):
     """Detects if an image is grayscale or not"""
@@ -183,8 +189,11 @@ def color2gray():
     color_image = openimagedialog("img", "Select image")
 
     if isgrayscale(color_image):
-        print("""ERROR:
-        The images is grayscale already.""")
+        messagebox.showwarning(
+            title = "Warning",
+            message = "The image is grayscale already"
+            )
+        color2gray()
     else:
         # Color image
         displayimage(color_image, "Color image")
