@@ -9,12 +9,13 @@ Date: 5 Oct 2022
 
 ### Version 1.2 (work in progress)
 Date:
+- Added feature to display images in tkinter windows
+- Added menu bar
 - Exit logic refactoring
 - compareimages bugfix
 
 ### Version 1.1
 Date: 5 Oct 2022
-- Added menu bar
 - Added color2gray functionality
 - Added option to save image as a file
 - UI improved

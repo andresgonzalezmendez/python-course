@@ -10,6 +10,7 @@ Main script
 
 from tkinter import messagebox, filedialog
 import tkinter as tk
+from PIL import Image, ImageTk
 import cv2
 
 # CONSTANTS
@@ -36,12 +37,51 @@ PADY_LABELSBUTTONS = 5
 def openimagedialog(initial_dir, dialog_title):
     """Function to read an image from the computer"""
 
-    file = filedialog.askopenfilename(
+    filename = filedialog.askopenfilename(
         initialdir = initial_dir,
         title = dialog_title,
         filetypes = FILES_ALLOWED)
 
-    return cv2.imread(file)
+    return cv2.imread(filename)
+
+def imagecv2totk(image_cv2):
+    """Function to convert OpenCV images to Pillow"""
+
+    image_rgb = cv2.cvtColor(image_cv2, cv2.COLOR_BGR2RGB)
+
+    return ImageTk.PhotoImage(Image.fromarray(image_rgb))
+
+def displayimage(image, label):
+    """Function to display an image in new window"""
+
+    window = tk.Toplevel(bg = WINDOW_BACKGROUND_COLOR)
+    window.title(f"Image - {PROGRAM_NAME} v{VERSION_NUMBER}")
+    window.resizable(False, False)
+
+    text_label = tk.Label(
+        window,
+        text = label,
+        font = (FONT, 30),
+        bg = WINDOW_BACKGROUND_COLOR
+        )
+    text_label.pack(pady = PADY_LABELSBUTTONS)
+
+    image_tk = imagecv2totk(image)
+
+    image_label = tk.Label(
+        window,
+        bg = WINDOW_BACKGROUND_COLOR,
+        image = image_tk
+    )
+    image_label.image = image_tk
+    image_label.pack()
+
+    window.protocol("WM_DELETE_WINDOW", lambda: saveimage(
+        window,
+        image,
+        "img",
+        "Select path to save image:")
+    )
 
 def exitapp():
     """Show confirmation dialog"""
@@ -50,7 +90,7 @@ def exitapp():
         default = messagebox.NO):
         root.destroy()
 
-def saveimage(image, initial_dir, dialog_title):
+def saveimage(window, image, initial_dir, dialog_title):
     """Dialog for saving images"""
 
     user_choice = messagebox.askyesnocancel(
@@ -64,12 +104,14 @@ def saveimage(image, initial_dir, dialog_title):
             filetypes = FILES_ALLOWED
         )
         cv2.imwrite(filename, image)
-        cv2.destroyAllWindows()
+        window.destroy()
     elif user_choice is None:
-        cv2.waitKey(0)
-        saveimage(image, initial_dir, dialog_title)
+        window.protocol(
+            "WM_DELETE_WINDOW",
+            lambda: saveimage(window, image, "img", "Select path to save image:")
+            )
     else:
-        cv2.destroyAllWindows()
+        window.destroy()
 
 def getimagesize(image):
     """Get image size"""
@@ -99,7 +141,10 @@ def compareimages():
     else:
         difference = cv2.absdiff(image_a, image_b)
 
-        cv2.imshow("Original images", cv2.hconcat([image_a, image_b]))
+        displayimage(image_a, "Image n.1")
+        displayimage(image_b, "Image n.2")
+
+        #cv2.imshow("Original images", cv2.hconcat([image_a, image_b]))
 
         num_different_pixels = cv2.countNonZero(
             cv2.cvtColor(difference, cv2.COLOR_BGR2GRAY))
@@ -107,10 +152,6 @@ def compareimages():
         if num_different_pixels == 0:
             print ("""RESULT:
             Both images are exactly the same!""")
-
-            cv2.waitKey(0)
-            cv2.destroyAllWindows()
-
         else:
             percentage_different_pixels = 100 * num_different_pixels/(
                 getimagesize(difference)[0]*getimagesize(difference)[1])
@@ -121,9 +162,7 @@ def compareimages():
             # TO DO:
             # show the differences in white, instead of the difference color itself
 
-            cv2.imshow("Difference", difference)
-            cv2.waitKey(0)
-            saveimage(difference, "img", "Save your image")
+            displayimage(difference, "Difference")
 
 def isgrayscale(image):
     """Detects if an image is grayscale or not"""
@@ -147,13 +186,12 @@ def color2gray():
         print("""ERROR:
         The images is grayscale already.""")
     else:
+        # Color image
+        displayimage(color_image, "Color image")
+
+        # Gray image
         gray_image = cv2.cvtColor(color_image, cv2.COLOR_BGR2GRAY)
-
-        cv2.imshow("Original image", color_image)
-        cv2.imshow("Grayscale image", gray_image)
-
-        cv2.waitKey(0)
-        saveimage(gray_image, "img", "Save your image")
+        displayimage(gray_image, "Gray image")
 
 # MAIN
 
