@@ -206,8 +206,10 @@ def color2gray():
 def rotate_image(image, angle):
     """Rotates an image (angle in degrees) and expands image to avoid cropping"""
 
-    height, width = image.shape[:2] # image shape has 3 dimensions
-    image_center = (width/2, height/2) # getRotationMatrix2D needs coordinates in reverse order (width, height) compared to shape
+    # image shape has 3 dimensions
+    height, width = image.shape[:2]
+    # getRotationMatrix2D needs coordinates in reverse order (width, height) compared to shape
+    image_center = (width/2, height/2)
 
     rotation_mat = cv2.getRotationMatrix2D(image_center, angle, 1.)
 
@@ -219,7 +221,8 @@ def rotate_image(image, angle):
     bound_w = int(height * abs_sin + width * abs_cos)
     bound_h = int(height * abs_cos + width * abs_sin)
 
-    # subtract old image center (bringing image back to origo) and adding the new image center coordinates
+    # subtract old image center (bringing image back to origo)
+    # and adding the new image center coordinates
     rotation_mat[0, 2] += bound_w/2 - image_center[0]
     rotation_mat[1, 2] += bound_h/2 - image_center[1]
 
