@@ -1,14 +1,14 @@
 """
 Program: Odin Digital
-Version: 1.2-beta
+Version: 1.2
 Author: Andrés González Méndez
-Date: 5 Oct 2022
+Date: 25 Oct 2022
 Main script
 """
 
 # IMPORTS
 
-from tkinter import messagebox, filedialog
+from tkinter import messagebox, filedialog, IntVar
 import tkinter as tk
 from PIL import Image, ImageTk
 import cv2
@@ -16,7 +16,7 @@ import cv2
 # CONSTANTS
 
 PROGRAM_NAME = "Odin Digital"
-VERSION_NUMBER = "1.2-beta"
+VERSION_NUMBER = "1.2"
 FONT = "Verdana"
 WINDOW_BACKGROUND_COLOR = "light gray"
 WELCOME_TEXT = f"""Welcome to {PROGRAM_NAME} v{VERSION_NUMBER}, a digital image processing tool
@@ -27,9 +27,10 @@ FILES_ALLOWED = [("Image Files",
     ".pbm", ".pgm", ".ppm", ".sr", ".ras", ".tiff", ".tif"])]
 COLOR2GRAY_LABEL = "Select a color image to convert it to grayscale"
 COMPAREIMAGES_LABEL = "Select two images to see how different they are"
+ROTATEIMAGE_LABEL = "Rotate an image in any direction"
 EXIT_APP = "See you soon!"
-PADY_INTROTEXT = 40
-PADY_FRAMES = 20
+PADY_INTROTEXT = 30
+PADY_FRAMES = 15
 PADY_LABELSBUTTONS = 5
 
 # FUNCTIONS
@@ -184,7 +185,7 @@ def isgrayscale(image):
     return True
 
 def color2gray():
-    """ Function to turn an image from color to grayscale"""
+    """Function to turn an image from color to grayscale"""
 
     color_image = openimagedialog("img", "Select image")
 
@@ -201,6 +202,155 @@ def color2gray():
         # Gray image
         gray_image = cv2.cvtColor(color_image, cv2.COLOR_BGR2GRAY)
         displayimage(gray_image, "Gray image")
+
+def rotate_image(image, angle):
+    """Rotates an image (angle in degrees) and expands image to avoid cropping"""
+
+    height, width = image.shape[:2] # image shape has 3 dimensions
+    image_center = (width/2, height/2) # getRotationMatrix2D needs coordinates in reverse order (width, height) compared to shape
+
+    rotation_mat = cv2.getRotationMatrix2D(image_center, angle, 1.)
+
+    # rotation calculates the cos and sin, taking absolutes of those.
+    abs_cos = abs(rotation_mat[0,0])
+    abs_sin = abs(rotation_mat[0,1])
+
+    # find the new width and height bounds
+    bound_w = int(height * abs_sin + width * abs_cos)
+    bound_h = int(height * abs_cos + width * abs_sin)
+
+    # subtract old image center (bringing image back to origo) and adding the new image center coordinates
+    rotation_mat[0, 2] += bound_w/2 - image_center[0]
+    rotation_mat[1, 2] += bound_h/2 - image_center[1]
+
+    # rotate image with the new bounds and translated rotation matrix
+    rotated_mat = cv2.warpAffine(image, rotation_mat, (bound_w, bound_h))
+    return rotated_mat
+
+def digitvalidation(char):
+    """Function to check that only numbers are entered in the Entry box"""
+    if char in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']:
+        return True
+
+    return False
+
+def rotateimage():
+    """Function to rotate an image"""
+
+    original_image = openimagedialog("img", "Select image")
+    displayimage(original_image, "Original image")
+
+    dialog = tk.Toplevel(bg = WINDOW_BACKGROUND_COLOR)
+    dialog.title(f"Image rotation - {PROGRAM_NAME} v{VERSION_NUMBER}")
+    dialog.geometry("400x300")
+    dialog.resizable(False, False)
+
+    direction_frame = tk.Frame(
+        dialog,
+        bg = WINDOW_BACKGROUND_COLOR
+    )
+    direction_frame.pack(pady = PADY_FRAMES)
+
+    direction_text_label = tk.Label(
+        direction_frame,
+        text = """In which direction do you want to rotate the image?""",
+        font = (FONT, 15),
+        bg = WINDOW_BACKGROUND_COLOR
+        )
+    direction_text_label.pack(pady = PADY_LABELSBUTTONS)
+
+    direction_checkboxes_frame = tk.Frame(
+        direction_frame,
+        bg = WINDOW_BACKGROUND_COLOR
+    )
+    direction_checkboxes_frame.pack(pady = PADY_LABELSBUTTONS)
+
+    rot_direction = IntVar()
+    rot_direction.set(0)
+
+    clockwise_checkbox = tk.Radiobutton(
+        direction_checkboxes_frame,
+        bg = WINDOW_BACKGROUND_COLOR,
+        text = "Clockwise",
+        variable = rot_direction,
+        value = 1
+    )
+    clockwise_checkbox.pack(pady = PADY_LABELSBUTTONS, padx = 10, side = tk.LEFT)
+
+    counterclockwise_checkbox = tk.Radiobutton(
+        direction_checkboxes_frame,
+        bg = WINDOW_BACKGROUND_COLOR,
+        text = "Counterclockwise",
+        variable = rot_direction,
+        value = 2
+    )
+    counterclockwise_checkbox.pack(pady = PADY_LABELSBUTTONS, padx = 10, side = tk.RIGHT)
+
+    angle_frame = tk.Frame(
+        dialog,
+        bg = WINDOW_BACKGROUND_COLOR
+    )
+    angle_frame.pack(pady = PADY_FRAMES)
+
+    angle_text_label = tk.Label(
+        angle_frame,
+        text = """How many degrees?""",
+        font = (FONT, 15),
+        bg = WINDOW_BACKGROUND_COLOR
+        )
+    angle_text_label.pack(pady = PADY_LABELSBUTTONS)
+
+    angle_entrybox = tk.Entry(
+        angle_frame,
+        validate = 'key',
+        validatecommand = (angle_frame.register(digitvalidation), '%S')
+    )
+    angle_entrybox.pack(pady = PADY_LABELSBUTTONS)
+
+    def rotate():
+        if len(angle_entrybox.get()) == 0:
+            messagebox.showwarning(
+                title = "Warning",
+                message = "Please fill in all required fields"
+            )
+            return False
+
+        if rot_direction.get() == 1:
+            angle = -int(angle_entrybox.get())
+        elif rot_direction.get() == 2:
+            angle = int(angle_entrybox.get())
+        else:
+            messagebox.showwarning(
+                title = "Warning",
+                message = "Please fill in all required fields"
+            )
+            return False
+
+        rot_image = rotate_image(original_image, angle)
+        displayimage(rot_image, "Rotated image")
+        return True
+
+    buttons_frame = tk.Frame(
+        dialog,
+        bg = WINDOW_BACKGROUND_COLOR
+    )
+    buttons_frame.pack(pady = PADY_FRAMES)
+
+    go_button = tk.Button(
+        buttons_frame,
+        text = "Rotate!",
+        bg = WINDOW_BACKGROUND_COLOR,
+        command = rotate
+    )
+    go_button.pack(pady = PADY_LABELSBUTTONS, padx = 10, side = tk.RIGHT)
+
+    close_button = tk.Button(
+        buttons_frame,
+        text = "Close",
+        bg = WINDOW_BACKGROUND_COLOR,
+        command = dialog.destroy
+    )
+    close_button.pack(pady = PADY_LABELSBUTTONS, padx = 10, side = tk.LEFT)
 
 # MAIN
 
@@ -249,6 +399,10 @@ tools_menu.add_command(
 tools_menu.add_command(
     label = "Compare images",
     command = compareimages
+    )
+tools_menu.add_command(
+    label = "Rotate image",
+    command = rotateimage
     )
 
 menu_bar.add_cascade(
@@ -307,6 +461,31 @@ compareimages_button = tk.Button(
     command = compareimages
     )
 compareimages_button.pack(pady = PADY_LABELSBUTTONS)
+
+## Rotate frame
+
+rotateimage_frame = tk.Frame(
+    root,
+    bg = WINDOW_BACKGROUND_COLOR
+)
+rotateimage_frame.pack(pady = PADY_FRAMES)
+
+rotateimage_label = tk.Label(
+    rotateimage_frame,
+    text = ROTATEIMAGE_LABEL,
+    font = (FONT, 15),
+    bg = WINDOW_BACKGROUND_COLOR
+)
+rotateimage_label.pack(pady = PADY_LABELSBUTTONS)
+
+rotateimage_button = tk.Button(
+    rotateimage_frame,
+    text = "Rotate image",
+    font = (FONT, 15),
+    bg = WINDOW_BACKGROUND_COLOR,
+    command = rotateimage
+    )
+rotateimage_button.pack(pady = PADY_LABELSBUTTONS)
 
 ## Exit frame
 

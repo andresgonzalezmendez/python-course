@@ -1,14 +1,15 @@
 # Odin Digital
 Author: Andrés González
 
-Last published version: v1.1
+Last published version: v1.2
 
-Date: 5 Oct 2022
+Date: 25 Oct 2022
 
 ## Changelog:
 
-### Version 1.2 (work in progress)
+### Version 1.2
 Date:
+- Added feature to rotate images
 - Added warning and info dialogs
 - Added feature to display images in tkinter windows
 - Added menu bar
