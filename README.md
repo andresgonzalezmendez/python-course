@@ -7,8 +7,11 @@ Date: 25 Oct 2022
 
 ## Changelog:
 
+### Version 1.3-beta
+Date: 25 Oct 2022
+- compareimages bugfix
 ### Version 1.2
-Date:
+Date: 25 Oct 2022
 - Added feature to rotate images
 - Added warning and info dialogs
 - Added feature to display images in tkinter windows

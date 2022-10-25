@@ -1,6 +1,6 @@
 """
 Program: Odin Digital
-Version: 1.2
+Version: 1.3-beta
 Author: Andrés González Méndez
 Date: 25 Oct 2022
 Main script
@@ -16,7 +16,7 @@ import cv2
 # CONSTANTS
 
 PROGRAM_NAME = "Odin Digital"
-VERSION_NUMBER = "1.2"
+VERSION_NUMBER = "1.3-beta"
 FONT = "Verdana"
 WINDOW_BACKGROUND_COLOR = "light gray"
 WELCOME_TEXT = f"""Welcome to {PROGRAM_NAME} v{VERSION_NUMBER}, a digital image processing tool
@@ -141,35 +141,36 @@ def compareimages():
             title = "Warning",
             message = "Both images must be the same size"
             )
-        compareimages()
-    else:
-        difference = cv2.absdiff(image_a, image_b)
+        return False
 
-        displayimage(image_a, "Image n.1")
-        displayimage(image_b, "Image n.2")
+    difference = cv2.absdiff(image_a, image_b)
 
-        num_different_pixels = cv2.countNonZero(
-            cv2.cvtColor(difference, cv2.COLOR_BGR2GRAY))
+    num_different_pixels = cv2.countNonZero(
+        cv2.cvtColor(difference, cv2.COLOR_BGR2GRAY))
 
-        if num_different_pixels == 0:
-            messagebox.showinfo(
-                title = "Result",
-                message = "Both images are the same!"
-                )
-        else:
-            percentage_different_pixels = 100 * num_different_pixels/(
-                getimagesize(difference)[0]*getimagesize(difference)[1])
+    if num_different_pixels == 0:
+        messagebox.showinfo(
+            title = "Result",
+            message = "Both images are the same!"
+            )
+        return False
 
-            # TO DO:
-            # show the differences in white, instead of the difference color itself
+    percentage_different_pixels = 100 * num_different_pixels/(
+        getimagesize(difference)[0]*getimagesize(difference)[1])
 
-            displayimage(difference, "Difference")
+    # TO DO:
+    # show the differences in white, instead of the difference color itself
 
-            messagebox.showinfo(
-                title = "Result",
-                message = f"""There are differences between the two images!
-                Difference: {percentage_different_pixels:.2f}%"""
-                )
+    displayimage(image_a, "Image n.1")
+    displayimage(image_b, "Image n.2")
+    displayimage(difference, "Difference")
+
+    messagebox.showinfo(
+        title = "Result",
+        message = f"""There are differences between the two images!
+        Difference: {percentage_different_pixels:.2f}%"""
+        )
+    return True
 
 def isgrayscale(image):
     """Detects if an image is grayscale or not"""
@@ -195,13 +196,16 @@ def color2gray():
             message = "The image is grayscale already"
             )
         color2gray()
-    else:
-        # Color image
-        displayimage(color_image, "Color image")
+        return False
 
-        # Gray image
-        gray_image = cv2.cvtColor(color_image, cv2.COLOR_BGR2GRAY)
-        displayimage(gray_image, "Gray image")
+    # Color image
+    displayimage(color_image, "Color image")
+
+    # Gray image
+    gray_image = cv2.cvtColor(color_image, cv2.COLOR_BGR2GRAY)
+    displayimage(gray_image, "Gray image")
+
+    return True
 
 def rotate_image(image, angle):
     """Rotates an image (angle in degrees) and expands image to avoid cropping"""
