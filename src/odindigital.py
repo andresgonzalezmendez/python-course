@@ -29,10 +29,11 @@ COLOR2GRAY_LABEL = "Select a color image to convert it to grayscale"
 COMPAREIMAGES_LABEL = "Select two images to see how different they are"
 ROTATEIMAGE_LABEL = "Rotate an image in any direction"
 EDGES_LABEL = "Detect the edges of an image"
+MATCHTEMPLATE_LABEL = "Find an image contained within another image"
 EXIT_APP = "See you soon!"
-PADY_INTROTEXT = 20
-PADY_FRAMES = 10
-PADY_LABELSBUTTONS = 3
+PADY_INTROTEXT = 10
+PADY_FRAMES = 8
+PADY_LABELSBUTTONS = 2
 
 # FUNCTIONS
 
@@ -361,13 +362,33 @@ def rotateimage():
     close_button.pack(pady = PADY_LABELSBUTTONS, padx = 10, side = tk.LEFT)
 
 def edgedetection():
-    """Funciton to detec edges"""
+    """Funciton to detect edges"""
 
     image = openimagedialog("img", "Select image")
     edges = cv2.Canny(image,100,200)
 
     displayimage(image, "Original image")
     displayimage(edges, "Edges of the image")
+
+def matchtemplate():
+    """Function to find a an image contained within another image"""
+    image = openimagedialog("img", "Select the image")
+    image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    displayimage(image, "Original image")
+
+    template = openimagedialog("img", "Select the template")
+    template_gray = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)
+    displayimage(template, "Template image")
+
+    res = cv2.matchTemplate(image_gray, template_gray, cv2.TM_SQDIFF)
+    _, _, min_loc, _ = cv2.minMaxLoc(res)
+
+    x_1, y_1 = min_loc
+    x_2, y_2 = min_loc[0] + template.shape[1], min_loc[1] + template.shape[0]
+
+    cv2.rectangle(image, (x_1, y_1), (x_2, y_2), (0, 255, 0), 3)
+
+    displayimage(image, "Detection")
 
 # MAIN
 
@@ -424,6 +445,10 @@ tools_menu.add_command(
 tools_menu.add_command(
     label = "Edge detection",
     command = edgedetection
+    )
+tools_menu.add_command(
+    label = "Template matching",
+    command = matchtemplate
     )
 
 menu_bar.add_cascade(
@@ -532,6 +557,31 @@ edges_button = tk.Button(
     command = edgedetection
     )
 edges_button.pack(pady = PADY_LABELSBUTTONS)
+
+## Match template frame
+
+matchtemplate_frame = tk.Frame(
+    root,
+    bg = WINDOW_BACKGROUND_COLOR
+)
+matchtemplate_frame.pack(pady = PADY_FRAMES)
+
+matchtemplate_label = tk.Label(
+    matchtemplate_frame,
+    text = MATCHTEMPLATE_LABEL,
+    font = (FONT, 15),
+    bg = WINDOW_BACKGROUND_COLOR
+)
+matchtemplate_label.pack(pady = PADY_LABELSBUTTONS)
+
+matchtemplate_button = tk.Button(
+    matchtemplate_frame,
+    text = "Match template",
+    font = (FONT, 15),
+    bg = WINDOW_BACKGROUND_COLOR,
+    command = matchtemplate
+    )
+matchtemplate_button.pack(pady = PADY_LABELSBUTTONS)
 
 ## Exit frame
 
