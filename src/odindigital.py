@@ -28,10 +28,11 @@ FILES_ALLOWED = [("Image Files",
 COLOR2GRAY_LABEL = "Select a color image to convert it to grayscale"
 COMPAREIMAGES_LABEL = "Select two images to see how different they are"
 ROTATEIMAGE_LABEL = "Rotate an image in any direction"
+EDGES_LABEL = "Detect the edges of an image"
 EXIT_APP = "See you soon!"
-PADY_INTROTEXT = 30
-PADY_FRAMES = 15
-PADY_LABELSBUTTONS = 5
+PADY_INTROTEXT = 20
+PADY_FRAMES = 10
+PADY_LABELSBUTTONS = 3
 
 # FUNCTIONS
 
@@ -359,6 +360,15 @@ def rotateimage():
     )
     close_button.pack(pady = PADY_LABELSBUTTONS, padx = 10, side = tk.LEFT)
 
+def edgedetection():
+    """Funciton to detec edges"""
+
+    image = openimagedialog("img", "Select image")
+    edges = cv2.Canny(image,100,200)
+
+    displayimage(image, "Original image")
+    displayimage(edges, "Edges of the image")
+
 # MAIN
 
 root = tk.Tk()
@@ -410,6 +420,10 @@ tools_menu.add_command(
 tools_menu.add_command(
     label = "Rotate image",
     command = rotateimage
+    )
+tools_menu.add_command(
+    label = "Edge detection",
+    command = edgedetection
     )
 
 menu_bar.add_cascade(
@@ -493,6 +507,31 @@ rotateimage_button = tk.Button(
     command = rotateimage
     )
 rotateimage_button.pack(pady = PADY_LABELSBUTTONS)
+
+## Edges frame
+
+edges_frame = tk.Frame(
+    root,
+    bg = WINDOW_BACKGROUND_COLOR
+)
+edges_frame.pack(pady = PADY_FRAMES)
+
+edges_label = tk.Label(
+    edges_frame,
+    text = EDGES_LABEL,
+    font = (FONT, 15),
+    bg = WINDOW_BACKGROUND_COLOR
+)
+edges_label.pack(pady = PADY_LABELSBUTTONS)
+
+edges_button = tk.Button(
+    edges_frame,
+    text = "Edge detection",
+    font = (FONT, 15),
+    bg = WINDOW_BACKGROUND_COLOR,
+    command = edgedetection
+    )
+edges_button.pack(pady = PADY_LABELSBUTTONS)
 
 ## Exit frame
 

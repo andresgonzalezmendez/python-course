@@ -9,6 +9,7 @@ Date: 25 Oct 2022
 
 ### Version 1.3-beta
 Date: 25 Oct 2022
+- Added feature to detect edges
 - compareimages bugfix
 ### Version 1.2
 Date: 25 Oct 2022
