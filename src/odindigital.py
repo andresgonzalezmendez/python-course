@@ -391,6 +391,9 @@ def matchtemplate():
 
     displayimage(image, "Detection")
 
+def resizeimage():
+    """Function to resize an image"""
+
 # MAIN
 
 root = tk.Tk()
@@ -416,6 +419,11 @@ file_menu = tk.Menu(
     menu_bar,
     tearoff = False
 )
+
+root.configure(menu = menu_bar)
+
+## File menu bar
+
 file_menu.add_command(
     label = "Exit",
     command = exitapp
@@ -426,28 +434,34 @@ menu_bar.add_cascade(
     label = "File"
 )
 
+## Tools
+
 tools_menu = tk.Menu(
     menu_bar,
     tearoff = False
 )
 tools_menu.add_command(
-    label = "Color -> Gray",
+    label = "Color to grayscale",
     command = color2gray
     )
 tools_menu.add_command(
-    label = "Compare images",
-    command = compareimages
-    )
-tools_menu.add_command(
-    label = "Rotate image",
+    label = "Rotate",
     command = rotateimage
     )
 tools_menu.add_command(
-    label = "Edge detection",
+    label = "Resize",
+    command = resizeimage
+    )
+tools_menu.add_command(
+    label = "Compare two images",
+    command = compareimages
+    )
+tools_menu.add_command(
+    label = "Detect edges",
     command = edgedetection
     )
 tools_menu.add_command(
-    label = "Template matching",
+    label = "Match with template",
     command = matchtemplate
     )
 
@@ -455,8 +469,6 @@ menu_bar.add_cascade(
     menu = tools_menu,
     label = "Tools"
 )
-
-root.configure(menu = menu_bar)
 
 ## Buttons frame
 
@@ -470,56 +482,67 @@ main_buttons_frame.pack(pady = PADY_FRAMES)
 
 color2gray_button = tk.Button(
     main_buttons_frame,
-    text = "Color -> Gray",
+    text = "Color to grayscale",
     font = (FONT, 15),
     bg = WINDOW_BACKGROUND_COLOR,
     command = color2gray
     )
 color2gray_button.grid(pady = PADY_BUTTONS, padx = PADX_BUTTONS, row = 0, column = 0)
 
-## Compareimages button
-
-compareimages_button = tk.Button(
-    main_buttons_frame,
-    text = "Compare images",
-    font = (FONT, 15),
-    bg = WINDOW_BACKGROUND_COLOR,
-    command = compareimages
-    )
-compareimages_button.grid(pady = PADY_BUTTONS, padx = PADX_BUTTONS, row = 1, column = 0)
-
 ## Rotate button
 
 rotateimage_button = tk.Button(
     main_buttons_frame,
-    text = "Rotate image",
+    text = "Rotate",
     font = (FONT, 15),
     bg = WINDOW_BACKGROUND_COLOR,
     command = rotateimage
     )
-rotateimage_button.grid(pady = PADY_BUTTONS, padx = PADX_BUTTONS, row = 2, column = 0)
+rotateimage_button.grid(pady = PADY_BUTTONS, padx = PADX_BUTTONS, row = 1, column = 0)
+
+## Resize button
+
+resizeimage_button = tk.Button(
+    main_buttons_frame,
+    text = "Resize",
+    font = (FONT, 15),
+    bg = WINDOW_BACKGROUND_COLOR,
+    command = resizeimage
+    )
+resizeimage_button.grid(pady = PADY_BUTTONS, padx = PADX_BUTTONS, row = 2, column = 0)
+
+## Compareimages button
+
+compareimages_button = tk.Button(
+    main_buttons_frame,
+    text = "Compare two images",
+    font = (FONT, 15),
+    bg = WINDOW_BACKGROUND_COLOR,
+    command = compareimages
+    )
+compareimages_button.grid(pady = PADY_BUTTONS, padx = PADX_BUTTONS, row = 0, column = 1)
 
 ## Edges button
 
 edges_button = tk.Button(
     main_buttons_frame,
-    text = "Edge detection",
+    text = "Detect edges",
     font = (FONT, 15),
     bg = WINDOW_BACKGROUND_COLOR,
     command = edgedetection
     )
-edges_button.grid(pady = PADY_BUTTONS, padx = PADX_BUTTONS, row = 0, column = 1)
+edges_button.grid(pady = PADY_BUTTONS, padx = PADX_BUTTONS, row = 1, column = 1)
 
 ## Match template button
 
 matchtemplate_button = tk.Button(
     main_buttons_frame,
-    text = "Match template",
+    text = "Match with template",
     font = (FONT, 15),
     bg = WINDOW_BACKGROUND_COLOR,
     command = matchtemplate
     )
-matchtemplate_button.grid(pady = PADY_BUTTONS, padx = PADX_BUTTONS, row = 1, column = 1)
+matchtemplate_button.grid(pady = PADY_BUTTONS, padx = PADX_BUTTONS, row = 2, column = 1)
 
 ## Exit frame
 
