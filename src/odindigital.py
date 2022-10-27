@@ -25,12 +25,7 @@ developed by your QA friend Andrés González.
 FILES_ALLOWED = [("Image Files",
     [".bmp", ".dib", ".jpeg", ".jpg", ".jpe", ".jp2", ".png",
     ".pbm", ".pgm", ".ppm", ".sr", ".ras", ".tiff", ".tif"])]
-COLOR2GRAY_LABEL = "Select a color image to convert it to grayscale"
-COMPAREIMAGES_LABEL = "Select two images to see how different they are"
-ROTATEIMAGE_LABEL = "Rotate an image in any direction"
-EDGES_LABEL = "Detect the edges of an image"
-MATCHTEMPLATE_LABEL = "Find an image contained within another image"
-EXIT_APP = "See you soon!"
+EXIT_APP_LABEL = "See you soon!"
 PADY_FRAMES = 30
 PADX_LABELS = 50
 PADY_LABELS = 5
@@ -39,154 +34,40 @@ PADY_BUTTONS = 20
 
 # FUNCTIONS
 
-def openimagedialog(initial_dir, dialog_title):
-    """Asks the user to select an image and reads it
-
-    Args:
-        initial_dir (str): path of the initial directory
-        dialog_title (str): title of the dialog
+def color_to_gray():
+    """Script that turns an image from color to grayscale
 
     Returns:
-        numpy.ndarray: OpenCV-compatible image
+        bool: True if convertion is done, False otherwise
     """
 
-    filename = filedialog.askopenfilename(
-        initialdir = initial_dir,
-        title = dialog_title,
-        filetypes = FILES_ALLOWED)
+    color_image = open_image_dialog("img", "Select image")
 
-    return cv2.imread(filename)
-
-def imagecv2totk(image_cv2):
-    """Transforms a OpenCV-compatible image to a Tkinter-compatible image
-
-    Args:
-        image_cv2 (numpy.ndarray): OpenCV-compatible image
-
-    Returns:
-        PIL.ImageTk.PhotoImage: Tkinter-compatible image
-    """
-
-    image_rgb = cv2.cvtColor(image_cv2, cv2.COLOR_BGR2RGB)
-
-    return ImageTk.PhotoImage(Image.fromarray(image_rgb))
-
-def displayimage(image, label):
-    """Displays an image in a new window
-
-    Args:
-        image (numpy.ndarray): OpenCV-compatible image
-        label (str): Text label shown above the image
-    """
-
-    window = tk.Toplevel(bg = WINDOW_BACKGROUND_COLOR)
-    window.title(f"Image - {PROGRAM_NAME} v{VERSION_NUMBER}")
-    window.resizable(False, False)
-
-    text_label = tk.Label(
-        window,
-        text = label,
-        font = (FONT, 30),
-        bg = WINDOW_BACKGROUND_COLOR
-        )
-    text_label.pack(pady = PADY_LABELS)
-
-    image_tk = imagecv2totk(image)
-
-    image_label = tk.Label(
-        window,
-        bg = WINDOW_BACKGROUND_COLOR,
-        image = image_tk
-    )
-    image_label.image = image_tk
-    image_label.pack()
-
-    window.protocol("WM_DELETE_WINDOW", lambda: saveimage(
-        window,
-        image,
-        "img",
-        "Select path to save image:")
-    )
-
-def exitapp():
-    """Manages exit confirmation dialog"""
-
-    if messagebox.askyesno(
-        message = "Are you sure you want to exit the app?",
-        default = messagebox.NO):
-        root.destroy()
-
-def saveimage(window, image, initial_dir, dialog_title):
-    """Shows a dialog to save an image
-
-    Args:
-        window (tkinter.Toplevel): tkinter window containing the image
-        image (numpy.ndarray): OpenCV-compatible image
-        initial_dir (str): path of the initial directory
-        dialog_title (str): title of the dialog
-    """
-
-    user_choice = messagebox.askyesnocancel(
-        message = "Do you want to save the image before closing?"
-        )
-
-    if user_choice:
-        filename = filedialog.asksaveasfilename(
-            initialdir = initial_dir,
-            title = dialog_title,
-            filetypes = FILES_ALLOWED
-        )
-        cv2.imwrite(filename, image)
-        window.destroy()
-    elif user_choice is None:
-        window.protocol(
-            "WM_DELETE_WINDOW",
-            lambda: saveimage(window, image, "img", "Select path to save image:")
+    if is_grayscale(color_image):
+        messagebox.showwarning(
+            title = "Warning",
+            message = "The image is grayscale already"
             )
-    else:
-        window.destroy()
+        color_to_gray()
+        return False
 
-def getimagesize(image):
-    """Gets the size of an image
+    display_image(color_image, "Color image")
 
-    Args:
-        image (numpy.ndarray): OpenCV-compatible image
+    gray_image = cv2.cvtColor(color_image, cv2.COLOR_BGR2GRAY)
+    display_image(gray_image, "Gray image")
 
-    Returns:
-        tuple (int, int, int): (height, width, channels) of the image
-    """
+    return True
 
-    height = image.shape[0]
-    width = image.shape[1]
-    channels = image.shape[2]
-    return (height, width, channels)
-
-def compareimagesizes(image1, image2):
-    """Compares the size of two images
-
-    Args:
-        image1 (numpy.ndarray): OpenCV-compatible image
-        image2 (numpy.ndarray): OpenCV-compatible image
-
-    Returns:
-        bool: True if sizes are equal, False otherwise
-    """
-
-    if getimagesize(image1) == getimagesize(image2):
-        return True
-
-    return False
-
-def compareimages():
+def compare_two_images():
     """Script to compares two images
 
     Returns:
         bool: True if images can be compared, False otherwise
     """
-    image_a = openimagedialog("img", "Select image number 1")
-    image_b = openimagedialog("img", "Select image number 2")
+    image_a = open_image_dialog("img", "Select image number 1")
+    image_b = open_image_dialog("img", "Select image number 2")
 
-    if not compareimagesizes(image_a, image_b):
+    if not compare_size_of_images(image_a, image_b):
         messagebox.showwarning(
             title = "Warning",
             message = "Both images must be the same size"
@@ -206,14 +87,14 @@ def compareimages():
         return False
 
     percentage_different_pixels = 100 * num_different_pixels/(
-        getimagesize(difference)[0]*getimagesize(difference)[1])
+        get_image_size(difference)[0]*get_image_size(difference)[1])
 
     # TO DO:
     # show the differences in white, instead of the difference color itself
 
-    displayimage(image_a, "Image n.1")
-    displayimage(image_b, "Image n.2")
-    displayimage(difference, "Difference")
+    display_image(image_a, "Image n.1")
+    display_image(image_b, "Image n.2")
+    display_image(difference, "Difference")
 
     messagebox.showinfo(
         title = "Result",
@@ -222,7 +103,121 @@ def compareimages():
         )
     return True
 
-def isgrayscale(image):
+def compare_size_of_images(image1, image2):
+    """Compares the size of two images
+
+    Args:
+        image1 (numpy.ndarray): OpenCV-compatible image
+        image2 (numpy.ndarray): OpenCV-compatible image
+
+    Returns:
+        bool: True if sizes are equal, False otherwise
+    """
+
+    if get_image_size(image1) == get_image_size(image2):
+        return True
+
+    return False
+
+def digit_validation(char):
+    """Checks that only numbers are entered in the Entry box
+
+    Args:
+        char (str): entered character in the Entry box
+
+    Returns:
+        bool: True if the character is a digit, False otherwise
+    """
+
+    if char in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']:
+        return True
+
+    return False
+
+def display_image(image, label):
+    """Displays an image in a new window
+
+    Args:
+        image (numpy.ndarray): OpenCV-compatible image
+        label (str): Text label shown above the image
+    """
+
+    window = tk.Toplevel(bg = WINDOW_BACKGROUND_COLOR)
+    window.title(f"Image - {PROGRAM_NAME} v{VERSION_NUMBER}")
+    window.resizable(False, False)
+
+    text_label = tk.Label(
+        window,
+        text = label,
+        font = (FONT, 30),
+        bg = WINDOW_BACKGROUND_COLOR
+        )
+    text_label.pack(pady = PADY_LABELS)
+
+    image_tk = image_cv2_to_tk(image)
+
+    image_label = tk.Label(
+        window,
+        bg = WINDOW_BACKGROUND_COLOR,
+        image = image_tk
+    )
+    image_label.image = image_tk
+    image_label.pack()
+
+    window.protocol("WM_DELETE_WINDOW", lambda: save_image(
+        window,
+        image,
+        "img",
+        "Select path to save image:")
+    )
+
+def edge_detection():
+    """Script that detects edges in an image"""
+
+    image = open_image_dialog("img", "Select image")
+    edges = cv2.Canny(image,100,200)
+
+    display_image(image, "Original image")
+    display_image(edges, "Edges of the image")
+
+def exit_app():
+    """Manages exit confirmation dialog"""
+
+    if messagebox.askyesno(
+        message = "Are you sure you want to exit the app?",
+        default = messagebox.NO):
+        root.destroy()
+
+def get_image_size(image):
+    """Gets the size of an image
+
+    Args:
+        image (numpy.ndarray): OpenCV-compatible image
+
+    Returns:
+        tuple (int, int, int): (height, width, channels) of the image
+    """
+
+    height = image.shape[0]
+    width = image.shape[1]
+    channels = image.shape[2]
+    return (height, width, channels)
+
+def image_cv2_to_tk(image_cv2):
+    """Transforms a OpenCV-compatible image to a Tkinter-compatible image
+
+    Args:
+        image_cv2 (numpy.ndarray): OpenCV-compatible image
+
+    Returns:
+        PIL.ImageTk.PhotoImage: Tkinter-compatible image
+    """
+
+    image_rgb = cv2.cvtColor(image_cv2, cv2.COLOR_BGR2RGB)
+
+    return ImageTk.PhotoImage(Image.fromarray(image_rgb))
+
+def is_grayscale(image):
     """Detects if an image is grayscale or not
 
     Args:
@@ -234,39 +229,57 @@ def isgrayscale(image):
 
     rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-    for i in range(getimagesize(rgb_image)[0]):
-        for j in range(getimagesize(rgb_image)[1]):
+    for i in range(get_image_size(rgb_image)[0]):
+        for j in range(get_image_size(rgb_image)[1]):
             (r_value, g_value, b_value) = rgb_image[i, j]
             if not r_value == g_value == b_value:
                 return False
 
     return True
 
-def color2gray():
-    """Script that turns an image from color to grayscale
+def match_template():
+    """Script that finds if an image is contained within another image"""
+
+    image = open_image_dialog("img", "Select the image")
+    image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    display_image(image, "Original image")
+
+    template = open_image_dialog("img", "Select the template")
+    template_gray = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)
+    display_image(template, "Template image")
+
+    res = cv2.matchTemplate(image_gray, template_gray, cv2.TM_SQDIFF)
+    _, _, min_loc, _ = cv2.minMaxLoc(res)
+
+    x_1, y_1 = min_loc
+    x_2, y_2 = min_loc[0] + template.shape[1], min_loc[1] + template.shape[0]
+
+    cv2.rectangle(image, (x_1, y_1), (x_2, y_2), (0, 255, 0), 3)
+
+    display_image(image, "Detection")
+
+def open_image_dialog(initial_dir, dialog_title):
+    """Asks the user to select an image and reads it
+
+    Args:
+        initial_dir (str): path of the initial directory
+        dialog_title (str): title of the dialog
 
     Returns:
-        bool: True if convertion is done, False otherwise
+        numpy.ndarray: OpenCV-compatible image
     """
 
-    color_image = openimagedialog("img", "Select image")
+    filename = filedialog.askopenfilename(
+        initialdir = initial_dir,
+        title = dialog_title,
+        filetypes = FILES_ALLOWED)
 
-    if isgrayscale(color_image):
-        messagebox.showwarning(
-            title = "Warning",
-            message = "The image is grayscale already"
-            )
-        color2gray()
-        return False
+    return cv2.imread(filename)
 
-    displayimage(color_image, "Color image")
+def resize_image():
+    """Script that resizes an image"""
 
-    gray_image = cv2.cvtColor(color_image, cv2.COLOR_BGR2GRAY)
-    displayimage(gray_image, "Gray image")
-
-    return True
-
-def rotate_image(image, angle):
+def rotate_without_cropping(image, angle):
     """Rotates an image avoiding cropping
 
     Source:
@@ -304,26 +317,11 @@ def rotate_image(image, angle):
     rotated_mat = cv2.warpAffine(image, rotation_mat, (bound_w, bound_h))
     return rotated_mat
 
-def digitvalidation(char):
-    """Checks that only numbers are entered in the Entry box
-
-    Args:
-        char (str): entered character in the Entry box
-
-    Returns:
-        bool: True if the character is a digit, False otherwise
-    """
-
-    if char in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']:
-        return True
-
-    return False
-
-def rotateimage():
+def rotate_image():
     """Script that rotates an image"""
 
-    original_image = openimagedialog("img", "Select image")
-    displayimage(original_image, "Original image")
+    original_image = open_image_dialog("img", "Select image")
+    display_image(original_image, "Original image")
 
     dialog = tk.Toplevel(bg = WINDOW_BACKGROUND_COLOR)
     dialog.title(f"Image rotation - {PROGRAM_NAME} v{VERSION_NUMBER}")
@@ -387,7 +385,7 @@ def rotateimage():
     angle_entrybox = tk.Entry(
         angle_frame,
         validate = 'key',
-        validatecommand = (angle_frame.register(digitvalidation), '%S')
+        validatecommand = (angle_frame.register(digit_validation), '%S')
     )
     angle_entrybox.pack(pady = PADY_BUTTONS)
 
@@ -410,8 +408,8 @@ def rotateimage():
             )
             return False
 
-        rot_image = rotate_image(original_image, angle)
-        displayimage(rot_image, "Rotated image")
+        rot_image = rotate_without_cropping(original_image, angle)
+        display_image(rot_image, "Rotated image")
         return True
 
     buttons_frame = tk.Frame(
@@ -436,38 +434,35 @@ def rotateimage():
     )
     close_button.pack(pady = PADY_BUTTONS, padx = PADX_BUTTONS, side = tk.LEFT)
 
-def edgedetection():
-    """Script that detects edges in an image"""
+def save_image(window, image, initial_dir, dialog_title):
+    """Shows a dialog to save an image
 
-    image = openimagedialog("img", "Select image")
-    edges = cv2.Canny(image,100,200)
+    Args:
+        window (tkinter.Toplevel): tkinter window containing the image
+        image (numpy.ndarray): OpenCV-compatible image
+        initial_dir (str): path of the initial directory
+        dialog_title (str): title of the dialog
+    """
 
-    displayimage(image, "Original image")
-    displayimage(edges, "Edges of the image")
+    user_choice = messagebox.askyesnocancel(
+        message = "Do you want to save the image before closing?"
+        )
 
-def matchtemplate():
-    """Script that finds if an image is contained within another image"""
-
-    image = openimagedialog("img", "Select the image")
-    image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    displayimage(image, "Original image")
-
-    template = openimagedialog("img", "Select the template")
-    template_gray = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)
-    displayimage(template, "Template image")
-
-    res = cv2.matchTemplate(image_gray, template_gray, cv2.TM_SQDIFF)
-    _, _, min_loc, _ = cv2.minMaxLoc(res)
-
-    x_1, y_1 = min_loc
-    x_2, y_2 = min_loc[0] + template.shape[1], min_loc[1] + template.shape[0]
-
-    cv2.rectangle(image, (x_1, y_1), (x_2, y_2), (0, 255, 0), 3)
-
-    displayimage(image, "Detection")
-
-def resizeimage():
-    """Script that resizes an image"""
+    if user_choice:
+        filename = filedialog.asksaveasfilename(
+            initialdir = initial_dir,
+            title = dialog_title,
+            filetypes = FILES_ALLOWED
+        )
+        cv2.imwrite(filename, image)
+        window.destroy()
+    elif user_choice is None:
+        window.protocol(
+            "WM_DELETE_WINDOW",
+            lambda: save_image(window, image, "img", "Select path to save image:")
+            )
+    else:
+        window.destroy()
 
 # MAIN
 
@@ -497,11 +492,11 @@ file_menu = tk.Menu(
 
 root.configure(menu = menu_bar)
 
-## File menu bar
+### File
 
 file_menu.add_command(
     label = "Exit",
-    command = exitapp
+    command = exit_app
     )
 
 menu_bar.add_cascade(
@@ -509,7 +504,7 @@ menu_bar.add_cascade(
     label = "File"
 )
 
-## Tools
+### Tools
 
 tools_menu = tk.Menu(
     menu_bar,
@@ -517,27 +512,27 @@ tools_menu = tk.Menu(
 )
 tools_menu.add_command(
     label = "Color to grayscale",
-    command = color2gray
+    command = color_to_gray
     )
 tools_menu.add_command(
     label = "Rotate",
-    command = rotateimage
+    command = rotate_image
     )
 tools_menu.add_command(
     label = "Resize",
-    command = resizeimage
+    command = resize_image
     )
 tools_menu.add_command(
     label = "Compare two images",
-    command = compareimages
+    command = compare_two_images
     )
 tools_menu.add_command(
     label = "Detect edges",
-    command = edgedetection
+    command = edge_detection
     )
 tools_menu.add_command(
     label = "Match with template",
-    command = matchtemplate
+    command = match_template
     )
 
 menu_bar.add_cascade(
@@ -553,69 +548,69 @@ main_buttons_frame = tk.Frame(
 )
 main_buttons_frame.pack(pady = PADY_FRAMES)
 
-## Color2gray button
+### Color2gray button
 
 color2gray_button = tk.Button(
     main_buttons_frame,
     text = "Color to grayscale",
     font = (FONT, 15),
     bg = WINDOW_BACKGROUND_COLOR,
-    command = color2gray
+    command = color_to_gray
     )
 color2gray_button.grid(pady = PADY_BUTTONS, padx = PADX_BUTTONS, row = 0, column = 0)
 
-## Rotate button
+### Rotate button
 
 rotateimage_button = tk.Button(
     main_buttons_frame,
     text = "Rotate",
     font = (FONT, 15),
     bg = WINDOW_BACKGROUND_COLOR,
-    command = rotateimage
+    command = rotate_image
     )
 rotateimage_button.grid(pady = PADY_BUTTONS, padx = PADX_BUTTONS, row = 1, column = 0)
 
-## Resize button
+### Resize button
 
 resizeimage_button = tk.Button(
     main_buttons_frame,
     text = "Resize",
     font = (FONT, 15),
     bg = WINDOW_BACKGROUND_COLOR,
-    command = resizeimage
+    command = resize_image
     )
 resizeimage_button.grid(pady = PADY_BUTTONS, padx = PADX_BUTTONS, row = 2, column = 0)
 
-## Compareimages button
+### Compareimages button
 
 compareimages_button = tk.Button(
     main_buttons_frame,
     text = "Compare two images",
     font = (FONT, 15),
     bg = WINDOW_BACKGROUND_COLOR,
-    command = compareimages
+    command = compare_two_images
     )
 compareimages_button.grid(pady = PADY_BUTTONS, padx = PADX_BUTTONS, row = 0, column = 1)
 
-## Edges button
+### Edges button
 
 edges_button = tk.Button(
     main_buttons_frame,
     text = "Detect edges",
     font = (FONT, 15),
     bg = WINDOW_BACKGROUND_COLOR,
-    command = edgedetection
+    command = edge_detection
     )
 edges_button.grid(pady = PADY_BUTTONS, padx = PADX_BUTTONS, row = 1, column = 1)
 
-## Match template button
+### Match template button
 
 matchtemplate_button = tk.Button(
     main_buttons_frame,
     text = "Match with template",
     font = (FONT, 15),
     bg = WINDOW_BACKGROUND_COLOR,
-    command = matchtemplate
+    command = match_template
     )
 matchtemplate_button.grid(pady = PADY_BUTTONS, padx = PADX_BUTTONS, row = 2, column = 1)
 
@@ -629,7 +624,7 @@ exit_frame.pack(pady = PADY_FRAMES)
 
 exit_label = tk.Label(
     exit_frame,
-    text = EXIT_APP,
+    text = EXIT_APP_LABEL,
     font = (FONT, 15),
     bg = WINDOW_BACKGROUND_COLOR
 )
@@ -639,11 +634,11 @@ exit_button = tk.Button(
     exit_frame,
     text = "Exit",
     font = (FONT, 15),
-    command = exitapp
+    command = exit_app
     )
 exit_button.pack(pady = PADY_LABELS)
 
 ##
 
-root.protocol("WM_DELETE_WINDOW", exitapp)
+root.protocol("WM_DELETE_WINDOW", exit_app)
 root.mainloop()
