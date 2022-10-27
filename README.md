@@ -8,7 +8,8 @@ Date: 25 Oct 2022
 ## Changelog:
 
 ### Version 1.3-beta
-Date: 25 Oct 2022
+Date: 26 Oct 2022
+- UI improvements
 - Added feature to find an image within a different image
 - Added feature to detect edges
 - compareimages bugfix

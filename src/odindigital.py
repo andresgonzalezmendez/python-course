@@ -2,7 +2,7 @@
 Program: Odin Digital
 Version: 1.3-beta
 Author: Andrés González Méndez
-Date: 25 Oct 2022
+Date: 26 Oct 2022
 Main script
 """
 
@@ -31,9 +31,11 @@ ROTATEIMAGE_LABEL = "Rotate an image in any direction"
 EDGES_LABEL = "Detect the edges of an image"
 MATCHTEMPLATE_LABEL = "Find an image contained within another image"
 EXIT_APP = "See you soon!"
-PADY_INTROTEXT = 10
-PADY_FRAMES = 8
-PADY_LABELSBUTTONS = 2
+PADY_FRAMES = 30
+PADX_LABELS = 50
+PADY_LABELS = 5
+PADX_BUTTONS = 20
+PADY_BUTTONS = 20
 
 # FUNCTIONS
 
@@ -67,7 +69,7 @@ def displayimage(image, label):
         font = (FONT, 30),
         bg = WINDOW_BACKGROUND_COLOR
         )
-    text_label.pack(pady = PADY_LABELSBUTTONS)
+    text_label.pack(pady = PADY_LABELS)
 
     image_tk = imagecv2totk(image)
 
@@ -251,7 +253,6 @@ def rotateimage():
 
     dialog = tk.Toplevel(bg = WINDOW_BACKGROUND_COLOR)
     dialog.title(f"Image rotation - {PROGRAM_NAME} v{VERSION_NUMBER}")
-    dialog.geometry("400x300")
     dialog.resizable(False, False)
 
     direction_frame = tk.Frame(
@@ -266,13 +267,13 @@ def rotateimage():
         font = (FONT, 15),
         bg = WINDOW_BACKGROUND_COLOR
         )
-    direction_text_label.pack(pady = PADY_LABELSBUTTONS)
+    direction_text_label.pack(pady = PADY_LABELS, padx = PADX_LABELS)
 
     direction_checkboxes_frame = tk.Frame(
         direction_frame,
         bg = WINDOW_BACKGROUND_COLOR
     )
-    direction_checkboxes_frame.pack(pady = PADY_LABELSBUTTONS)
+    direction_checkboxes_frame.pack(pady = PADY_LABELS)
 
     rot_direction = IntVar()
     rot_direction.set(0)
@@ -284,7 +285,7 @@ def rotateimage():
         variable = rot_direction,
         value = 1
     )
-    clockwise_checkbox.pack(pady = PADY_LABELSBUTTONS, padx = 10, side = tk.LEFT)
+    clockwise_checkbox.pack(pady = PADY_BUTTONS, padx = PADX_BUTTONS, side = tk.LEFT)
 
     counterclockwise_checkbox = tk.Radiobutton(
         direction_checkboxes_frame,
@@ -293,7 +294,7 @@ def rotateimage():
         variable = rot_direction,
         value = 2
     )
-    counterclockwise_checkbox.pack(pady = PADY_LABELSBUTTONS, padx = 10, side = tk.RIGHT)
+    counterclockwise_checkbox.pack(pady = PADY_BUTTONS, padx = PADX_BUTTONS, side = tk.RIGHT)
 
     angle_frame = tk.Frame(
         dialog,
@@ -307,14 +308,14 @@ def rotateimage():
         font = (FONT, 15),
         bg = WINDOW_BACKGROUND_COLOR
         )
-    angle_text_label.pack(pady = PADY_LABELSBUTTONS)
+    angle_text_label.pack(pady = PADY_LABELS)
 
     angle_entrybox = tk.Entry(
         angle_frame,
         validate = 'key',
         validatecommand = (angle_frame.register(digitvalidation), '%S')
     )
-    angle_entrybox.pack(pady = PADY_LABELSBUTTONS)
+    angle_entrybox.pack(pady = PADY_BUTTONS)
 
     def rotate():
         if len(angle_entrybox.get()) == 0:
@@ -351,7 +352,7 @@ def rotateimage():
         bg = WINDOW_BACKGROUND_COLOR,
         command = rotate
     )
-    go_button.pack(pady = PADY_LABELSBUTTONS, padx = 10, side = tk.RIGHT)
+    go_button.pack(pady = PADY_BUTTONS, padx = PADX_BUTTONS, side = tk.RIGHT)
 
     close_button = tk.Button(
         buttons_frame,
@@ -359,7 +360,7 @@ def rotateimage():
         bg = WINDOW_BACKGROUND_COLOR,
         command = dialog.destroy
     )
-    close_button.pack(pady = PADY_LABELSBUTTONS, padx = 10, side = tk.LEFT)
+    close_button.pack(pady = PADY_BUTTONS, padx = PADX_BUTTONS, side = tk.LEFT)
 
 def edgedetection():
     """Funciton to detect edges"""
@@ -394,7 +395,6 @@ def matchtemplate():
 
 root = tk.Tk()
 root.title(f"{PROGRAM_NAME} v{VERSION_NUMBER}")
-root.geometry("800x600")
 root.resizable(False, False)
 root.configure(bg = WINDOW_BACKGROUND_COLOR)
 
@@ -406,7 +406,7 @@ intro_text = tk.Label(
     font = (FONT, 20),
     bg = WINDOW_BACKGROUND_COLOR
 )
-intro_text.pack(pady = PADY_INTROTEXT)
+intro_text.pack(pady = PADY_FRAMES, padx = PADX_LABELS)
 
 ## Menu bar
 
@@ -458,130 +458,68 @@ menu_bar.add_cascade(
 
 root.configure(menu = menu_bar)
 
-## Color2gray frame
+## Buttons frame
 
-color2gray_frame = tk.Frame(
+main_buttons_frame = tk.Frame(
     root,
     bg = WINDOW_BACKGROUND_COLOR
 )
-color2gray_frame.pack(pady = PADY_FRAMES)
+main_buttons_frame.pack(pady = PADY_FRAMES)
 
-color2gray_label = tk.Label(
-    color2gray_frame,
-    text = COLOR2GRAY_LABEL,
-    font = (FONT, 15),
-    bg = WINDOW_BACKGROUND_COLOR
-)
-color2gray_label.pack(pady = PADY_LABELSBUTTONS)
+## Color2gray button
 
 color2gray_button = tk.Button(
-    color2gray_frame,
+    main_buttons_frame,
     text = "Color -> Gray",
     font = (FONT, 15),
     bg = WINDOW_BACKGROUND_COLOR,
     command = color2gray
     )
-color2gray_button.pack(pady = PADY_LABELSBUTTONS)
+color2gray_button.grid(pady = PADY_BUTTONS, padx = PADX_BUTTONS, row = 0, column = 0)
 
-## Compareimages frame
-
-compareimages_frame = tk.Frame(
-    root,
-    bg = WINDOW_BACKGROUND_COLOR
-)
-compareimages_frame.pack(pady = PADY_FRAMES)
-
-compareimages_label = tk.Label(
-    compareimages_frame,
-    text = COMPAREIMAGES_LABEL,
-    font = (FONT, 15),
-    bg = WINDOW_BACKGROUND_COLOR
-)
-compareimages_label.pack(pady = PADY_LABELSBUTTONS)
+## Compareimages button
 
 compareimages_button = tk.Button(
-    compareimages_frame,
+    main_buttons_frame,
     text = "Compare images",
     font = (FONT, 15),
     bg = WINDOW_BACKGROUND_COLOR,
     command = compareimages
     )
-compareimages_button.pack(pady = PADY_LABELSBUTTONS)
+compareimages_button.grid(pady = PADY_BUTTONS, padx = PADX_BUTTONS, row = 1, column = 0)
 
-## Rotate frame
-
-rotateimage_frame = tk.Frame(
-    root,
-    bg = WINDOW_BACKGROUND_COLOR
-)
-rotateimage_frame.pack(pady = PADY_FRAMES)
-
-rotateimage_label = tk.Label(
-    rotateimage_frame,
-    text = ROTATEIMAGE_LABEL,
-    font = (FONT, 15),
-    bg = WINDOW_BACKGROUND_COLOR
-)
-rotateimage_label.pack(pady = PADY_LABELSBUTTONS)
+## Rotate button
 
 rotateimage_button = tk.Button(
-    rotateimage_frame,
+    main_buttons_frame,
     text = "Rotate image",
     font = (FONT, 15),
     bg = WINDOW_BACKGROUND_COLOR,
     command = rotateimage
     )
-rotateimage_button.pack(pady = PADY_LABELSBUTTONS)
+rotateimage_button.grid(pady = PADY_BUTTONS, padx = PADX_BUTTONS, row = 2, column = 0)
 
-## Edges frame
-
-edges_frame = tk.Frame(
-    root,
-    bg = WINDOW_BACKGROUND_COLOR
-)
-edges_frame.pack(pady = PADY_FRAMES)
-
-edges_label = tk.Label(
-    edges_frame,
-    text = EDGES_LABEL,
-    font = (FONT, 15),
-    bg = WINDOW_BACKGROUND_COLOR
-)
-edges_label.pack(pady = PADY_LABELSBUTTONS)
+## Edges button
 
 edges_button = tk.Button(
-    edges_frame,
+    main_buttons_frame,
     text = "Edge detection",
     font = (FONT, 15),
     bg = WINDOW_BACKGROUND_COLOR,
     command = edgedetection
     )
-edges_button.pack(pady = PADY_LABELSBUTTONS)
+edges_button.grid(pady = PADY_BUTTONS, padx = PADX_BUTTONS, row = 0, column = 1)
 
-## Match template frame
-
-matchtemplate_frame = tk.Frame(
-    root,
-    bg = WINDOW_BACKGROUND_COLOR
-)
-matchtemplate_frame.pack(pady = PADY_FRAMES)
-
-matchtemplate_label = tk.Label(
-    matchtemplate_frame,
-    text = MATCHTEMPLATE_LABEL,
-    font = (FONT, 15),
-    bg = WINDOW_BACKGROUND_COLOR
-)
-matchtemplate_label.pack(pady = PADY_LABELSBUTTONS)
+## Match template button
 
 matchtemplate_button = tk.Button(
-    matchtemplate_frame,
+    main_buttons_frame,
     text = "Match template",
     font = (FONT, 15),
     bg = WINDOW_BACKGROUND_COLOR,
     command = matchtemplate
     )
-matchtemplate_button.pack(pady = PADY_LABELSBUTTONS)
+matchtemplate_button.grid(pady = PADY_BUTTONS, padx = PADX_BUTTONS, row = 1, column = 1)
 
 ## Exit frame
 
@@ -597,7 +535,7 @@ exit_label = tk.Label(
     font = (FONT, 15),
     bg = WINDOW_BACKGROUND_COLOR
 )
-exit_label.pack(pady = PADY_LABELSBUTTONS)
+exit_label.pack(pady = PADY_LABELS)
 
 exit_button = tk.Button(
     exit_frame,
@@ -605,7 +543,7 @@ exit_button = tk.Button(
     font = (FONT, 15),
     command = exitapp
     )
-exit_button.pack(pady = PADY_LABELSBUTTONS)
+exit_button.pack(pady = PADY_LABELS)
 
 ##
 
