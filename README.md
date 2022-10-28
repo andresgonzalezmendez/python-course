@@ -1,18 +1,20 @@
 # Odin Digital
 Author: Andrés González
 
-Last published version: v1.2
+Last published version: v1.3
 
-Date: 25 Oct 2022
+Date: 28 Oct 2022
 
 ## Changelog:
 
-### Version 1.3-beta
+### Version 1.3
 Date: 26 Oct 2022
+- Added feature to resize images
 - UI improvements
 - Added feature to find an image within a different image
 - Added feature to detect edges
 - compareimages bugfix
+
 ### Version 1.2
 Date: 25 Oct 2022
 - Added feature to rotate images

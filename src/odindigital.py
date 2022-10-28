@@ -1,8 +1,8 @@
 """
 Program: Odin Digital
-Version: 1.3-beta
+Version: 1.3
 Author: Andrés González Méndez
-Date: 26 Oct 2022
+Date: 28 Oct 2022
 Main script
 """
 
@@ -16,7 +16,7 @@ import cv2
 # CONSTANTS
 
 PROGRAM_NAME = "Odin Digital"
-VERSION_NUMBER = "1.3-beta"
+VERSION_NUMBER = "1.3"
 FONT = "Verdana"
 WINDOW_BACKGROUND_COLOR = "light gray"
 WELCOME_TEXT = f"""Welcome to {PROGRAM_NAME} v{VERSION_NUMBER}, a digital image processing tool
@@ -279,8 +279,202 @@ def open_image_dialog(initial_dir, dialog_title):
 def resize_image():
     """Script that resizes an image"""
 
+    original_image = open_image_dialog("img", "Select image")
+    display_image(original_image, "Original image")
+
+    dialog = tk.Toplevel(bg = WINDOW_BACKGROUND_COLOR)
+    dialog.title(f"Image resizing - {PROGRAM_NAME} v{VERSION_NUMBER}")
+    dialog.resizable(False, False)
+
+    blocks = []
+
+    blocks.append(tk.Frame(
+            dialog,
+            bg = WINDOW_BACKGROUND_COLOR
+        )
+    )
+    blocks[0].pack()
+
+    frames = []
+
+    frames.append(
+        tk.Frame(
+            blocks[0],
+            bg = WINDOW_BACKGROUND_COLOR
+        )
+    )
+    frames[0].grid(pady = PADY_BUTTONS, padx = PADX_BUTTONS, row = 0, column = 0)
+
+    frames.append(
+        tk.Frame(
+            blocks[0],
+            bg = WINDOW_BACKGROUND_COLOR
+        )
+    )
+    frames[1].grid(pady = PADY_BUTTONS, padx = PADX_BUTTONS, row = 0, column = 1)
+
+    label_original_size = tk.Label(
+        frames[1],
+        text = "Original image",
+        font = (FONT, 15),
+        bg = WINDOW_BACKGROUND_COLOR
+    )
+    label_original_size.pack()
+
+    frames.append(
+        tk.Frame(
+            blocks[0],
+            bg = WINDOW_BACKGROUND_COLOR
+        )
+    )
+    frames[2].grid(pady = PADY_BUTTONS, padx = PADX_BUTTONS, row = 0, column = 2)
+
+    label_new_size = tk.Label(
+        frames[2],
+        text = "New image",
+        font = (FONT, 15),
+        bg = WINDOW_BACKGROUND_COLOR
+    )
+    label_new_size.pack()
+
+    frames.append(
+        tk.Frame(
+            blocks[0],
+            bg = WINDOW_BACKGROUND_COLOR
+        )
+    )
+    frames[3].grid(pady = PADY_BUTTONS, padx = PADX_BUTTONS, row = 1, column = 0)
+
+    label_width = tk.Label(
+        frames[3],
+        text = "Width",
+        font = (FONT, 15),
+        bg = WINDOW_BACKGROUND_COLOR
+    )
+    label_width.pack()
+
+    frames.append(
+            tk.Frame(
+            blocks[0],
+            bg = WINDOW_BACKGROUND_COLOR
+        )
+    )
+    frames[4].grid(pady = PADY_BUTTONS, padx = PADX_BUTTONS, row = 1, column = 1)
+
+    original_width = tk.Label(
+        frames[4],
+        text = get_image_size(original_image)[1],
+        font = (FONT, 15),
+        bg = WINDOW_BACKGROUND_COLOR
+    )
+    original_width.pack()
+
+    frames.append(
+        tk.Frame(
+            blocks[0],
+            bg = WINDOW_BACKGROUND_COLOR
+        )
+    )
+    frames[5].grid(pady = PADY_BUTTONS, padx = PADX_BUTTONS, row = 1, column = 2)
+
+    new_width = tk.Entry(
+        frames[5],
+        validate = 'key',
+        validatecommand = (frames[5].register(digit_validation), '%S')
+    )
+    new_width.pack()
+
+    frames.append(
+        tk.Frame(
+            blocks[0],
+            bg = WINDOW_BACKGROUND_COLOR
+        )
+    )
+    frames[6].grid(pady = PADY_BUTTONS, padx = PADX_BUTTONS, row = 2, column = 0)
+
+    label_width = tk.Label(
+        frames[6],
+        text = "Height",
+        font = (FONT, 15),
+        bg = WINDOW_BACKGROUND_COLOR
+    )
+    label_width.pack()
+
+    frames.append(
+        tk.Frame(
+            blocks[0],
+            bg = WINDOW_BACKGROUND_COLOR
+        )
+    )
+    frames[7].grid(pady = PADY_BUTTONS, padx = PADX_BUTTONS, row = 2, column = 1)
+
+    original_heigth = tk.Label(
+        frames[7],
+        text = get_image_size(original_image)[0],
+        font = (FONT, 15),
+        bg = WINDOW_BACKGROUND_COLOR
+    )
+    original_heigth.pack()
+
+    frames.append(
+        tk.Frame(
+            blocks[0],
+            bg = WINDOW_BACKGROUND_COLOR
+        )
+    )
+    frames[8].grid(pady = PADY_BUTTONS, padx = PADX_BUTTONS, row = 2, column = 2)
+
+    new_height = tk.Entry(
+        frames[8],
+        validate = 'key',
+        validatecommand = (frames[8].register(digit_validation), '%S')
+    )
+    new_height.pack()
+
+    blocks.append(
+        tk.Frame(
+            dialog,
+            bg = WINDOW_BACKGROUND_COLOR
+        )
+    )
+    blocks[1].pack()
+
+    def resize():
+        if (len(new_width.get()) == 0) or (len(new_height.get()) == 0):
+            messagebox.showwarning(
+                title = "Warning",
+                message = "Please fill in all required fields"
+            )
+            return False
+
+        resized_image = cv2.resize(original_image, (int(new_width.get()), int(new_height.get())))
+        display_image(resized_image, "Resized image")
+        return True
+
+    buttons = []
+
+    buttons.append(
+        tk.Button(
+            blocks[1],
+            text = "Resize!",
+            bg = WINDOW_BACKGROUND_COLOR,
+            command = resize
+        )
+    )
+    buttons[0].pack(pady = PADY_BUTTONS, padx = PADX_BUTTONS, side = tk.RIGHT)
+
+    buttons.append(
+        tk.Button(
+            blocks[1],
+            text = "Close",
+            bg = WINDOW_BACKGROUND_COLOR,
+            command = dialog.destroy
+        )
+    )
+    buttons[1].pack(pady = PADY_BUTTONS, padx = PADX_BUTTONS, side = tk.LEFT)
+
 def rotate_without_cropping(image, angle):
-    """Rotates an image avoiding cropping
+    """Rotates an image without cropping
 
     Source:
         https://stackoverflow.com/questions/43892506/opencv-python-rotate-image-without-cropping-sides
@@ -331,7 +525,7 @@ def rotate_image():
         dialog,
         bg = WINDOW_BACKGROUND_COLOR
     )
-    direction_frame.pack(pady = PADY_FRAMES)
+    direction_frame.pack()
 
     direction_text_label = tk.Label(
         direction_frame,
@@ -372,7 +566,7 @@ def rotate_image():
         dialog,
         bg = WINDOW_BACKGROUND_COLOR
     )
-    angle_frame.pack(pady = PADY_FRAMES)
+    angle_frame.pack()
 
     angle_text_label = tk.Label(
         angle_frame,
@@ -416,7 +610,7 @@ def rotate_image():
         dialog,
         bg = WINDOW_BACKGROUND_COLOR
     )
-    buttons_frame.pack(pady = PADY_FRAMES)
+    buttons_frame.pack()
 
     go_button = tk.Button(
         buttons_frame,
